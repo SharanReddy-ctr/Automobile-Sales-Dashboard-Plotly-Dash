@@ -1,0 +1,50 @@
+import pandas as pd
+import plotly.express as px
+from dash import Dash, dcc, html, Input, Output
+
+app = Dash(__name__)
+
+df = pd.DataFrame({
+    "Year": [2020, 2020, 2021, 2021, 2022, 2022],
+    "Vehicle_Type": ["Car", "Truck", "Car", "Truck", "Car", "Truck"],
+    "Sales": [100, 80, 130, 90, 160, 120]
+})
+
+app.layout = html.Div([
+    html.H1("Automobile Sales Dashboard"),
+
+    html.Label("Select Year:"),
+
+    dcc.Dropdown(
+        id="year-dropdown",
+        options=[
+            {"label": str(year), "value": year}
+            for year in sorted(df["Year"].unique())
+        ],
+        value=2022
+    ),
+
+    dcc.Graph(id="sales-chart")
+])
+
+
+@app.callback(
+    Output("sales-chart", "figure"),
+    Input("year-dropdown", "value")
+)
+def update_chart(selected_year):
+
+    filtered_df = df[df["Year"] == selected_year]
+
+    fig = px.bar(
+        filtered_df,
+        x="Vehicle_Type",
+        y="Sales",
+        title=f"Automobile Sales - {selected_year}"
+    )
+
+    return fig
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
